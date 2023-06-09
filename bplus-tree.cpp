@@ -17,7 +17,7 @@ class node_sid {
     
     public:
         bool is_leaf;
-        sid* key[ORDER - 1];
+        sid key[ORDER - 1];
         node_sid* child[ORDER];
         int key_num;
 };
@@ -46,7 +46,7 @@ class node_cid {
     
     public:
         bool is_leaf;
-        cid* key[ORDER - 1];
+        cid key[ORDER - 1];
         node_cid* child[ORDER];
         int key_num;
 };
