@@ -355,9 +355,11 @@ int main()
     course.id = lastid;
     course.student.pop_back();
     node.insert(course);
+    course.student.clear();
+
+    fclose(fp);
 
     node.search(2142);
-
 	return 0;
 }
 
