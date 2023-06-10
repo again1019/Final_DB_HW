@@ -1,64 +1,57 @@
 #include <bits/stdc++.h>
 using namespace std;
-typedef long long ll;
-typedef unsigned long long ull;
-#define pb push_back
 
-int bucketSize = 100;
-
-class cid {
-public:
-    int id;
-    vector<string> student;
-};
+int bucketSize = 10;
 
 // Create 2 classes, one for node and one for tree;
 
 class node {
 public:
-	bool isLeaf;
+	string *key; // key is file name
 	node** ptr;
-	cid *key; 
+	bool isLeaf;
     int size;
-	node();
+
+	node() {
+        key = new string[bucketSize];
+        ptr = new node*[bucketSize + 1];
+        isLeaf = false;
+        size = 0;
+    }
 };
-node::node()
-{
-	key = new cid[bucketSize];
-	ptr = new node*[bucketSize + 1];
-}
+
 class Btree {
 public:
-	// Root of tree stored here;
-	node* root;
-	Btree();
-	void deleteNode(int);
+	node* root; // Root of tree stored here;
+	Btree() {
+        root = NULL;
+    }
 
-	int search(int);
-	void display(node*);
-	void insert(cid);
+	string search(string);
+	void insert(string);
+	void shiftLevel(string, node*, node*);
+
 	node* findParent(node*, node*);
-	node* getRoot();
-	void shiftLevel(cid, node*, node*);
+	node* getRoot() {
+        return root;
+    }
 };
 
-node* Btree::getRoot() { return root; }
-Btree::Btree() { root = NULL; }
 
-void Btree::insert(cid x)
-{
+void Btree::insert(string x) {
+    // insert a new node into the tree
 	if (root == NULL) {
 		root = new node;
 		root->key[0] = x;
 		root->isLeaf = true;
 		root->size = 1;
 	}
-
 	else {
 		node* current = root;
 		node* parent;
-
-		while (current->isLeaf == false) {
+        
+        // if current node is not a leaf, then go to the leaf
+		while (!current->isLeaf) {
 			parent = current;
 
 			for (int i = 0; i < current->size; i++) {
@@ -66,7 +59,6 @@ void Btree::insert(cid x)
 					current = current->ptr[i];
 					break;
 				}
-
 				if (i == current->size - 1) {
 					current = current->ptr[i + 1];
 					break;
