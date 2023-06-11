@@ -1,19 +1,19 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-int bucketSize = 5000;
+int bucketSize = 10;
 
 // Create 2 classes, one for node and one for bptree;
 
 class node {
 public:
-	string *key; // key is file name
+	int *key; // key is file name
 	node** ptr;
 	bool isLeaf;
     int size;
 
 	node() {
-        key = new string[bucketSize];
+        key = new int[bucketSize];
         ptr = new node*[bucketSize + 1];
         isLeaf = false;
         size = 0;
@@ -27,9 +27,9 @@ public:
         root = NULL;
     }
 
-	string search(string);
-	void insert(string);
-	void shiftLevel(string, node*, node*);
+	int search(int);
+	void insert(int);
+	void shiftLevel(int, node*, node*);
 
 	node* findParent(node*, node*);
 	node* getRoot() {
@@ -38,7 +38,7 @@ public:
 };
 
 
-void bptree::insert(string x) {
+void bptree::insert(int x) {
     // insert a new node into the tree
 	if (root == NULL) {
 		root = new node;
@@ -55,7 +55,7 @@ void bptree::insert(string x) {
             // | < a | A | a <= x < b | B | >= b | 
             // |  i  | i |     i+1    |i+1| i+2  | 
 			for (int i = 0; i < current->size; i++) {
-				if (x.compare(current->key[i]) < 0) {
+				if (x < current->key[i]) {
 					current = current->ptr[i];
 					break;
 				}
@@ -71,7 +71,7 @@ void bptree::insert(string x) {
 			int i = 0;
 
 			// find the right position of element to be inserted
-			while (x.compare(current->key[i]) > 0 && i < current->size)
+			while (x > current->key[i] && i < current->size)
 				// go to ptr where needs to be inserted.
 				i++;
 			for (int j = current->size; j > i; j--)
@@ -87,7 +87,7 @@ void bptree::insert(string x) {
 			current->ptr[current->size - 1] = NULL;
 		} else { // if block does not have enough space;
 			node* newLeaf = new node;
-			string tempNode[bucketSize + 1]; // in order to copy the elements
+			int tempNode[bucketSize + 1]; // in order to copy the elements
 
 			for (int i = 0; i < bucketSize; i++) {
 				// all elements of this block copy
@@ -96,7 +96,7 @@ void bptree::insert(string x) {
 			int i = 0, j;
 
 			// find the right position of element to be inserted
-			while (x.compare(current->key[i]) > 0 && i < bucketSize)
+			while (x > current->key[i] && i < bucketSize)
 				i++;
 			for (int j = bucketSize + 1; j > i; j--)
 				// adjust the elements to make space for new element
@@ -141,11 +141,11 @@ void bptree::insert(string x) {
 	}
 }
 
-void bptree::shiftLevel(string x, node* current, node* child) { 
+void bptree::shiftLevel(int x, node* current, node* child) { 
     // insert or create an internal node;
 	if (current->size < bucketSize) { // if it is not full
 		int i = 0;
-		while (x.compare(current->key[i]) > 0 && i < current->size)
+		while (x > current->key[i] && i < current->size)
 			i++;
 		for (int j = current->size; j > i; j--) {
 			current->key[j] = current->key[j - 1];
@@ -159,7 +159,7 @@ void bptree::shiftLevel(string x, node* current, node* child) {
 	} else { 
         // shift up
 		node* newInternal = new node;
-		string tempKey[bucketSize + 1];
+		int tempKey[bucketSize + 1];
 		node* tempPtr[bucketSize + 2];
 
         // copy to temp
@@ -169,7 +169,7 @@ void bptree::shiftLevel(string x, node* current, node* child) {
 			tempPtr[i] = current->ptr[i];
 
 		int i = 0, j;
-		while (x.compare(current->key[i]) > 0 && i < bucketSize)
+		while (x > current->key[i] && i < bucketSize)
 			i++;
 
 		for (int j = bucketSize + 1; j > i; j--)
@@ -206,26 +206,34 @@ void bptree::shiftLevel(string x, node* current, node* child) {
         }
 	}
 }
-string bptree::search(string x) {
+int bptree::search(int x) {
 	if (root == NULL)
-		return NULL;
+		return -1;
 	else {
 		node* current = root;
         // find the leaf node
 		while (current->isLeaf == false) {
 			for (int i = 0; i < current->size; i++) {
-				if (x.compare(current->key[i]) < 0) {
+				if (x < current->key[i]) {
 					current = current->ptr[i];
-					break;
+                    break;
 				}
 				if (i == current->size - 1) {
 					current = current->ptr[i + 1];
-					break;
-				}
+				    break;
+                }
 			}
 		}
-
-		return current->key[0];
+        int result = 0;
+        for (int i = 0; i < current->size; i++) {
+            cout << x << ":" << current->key[i] << endl;  //in order to degug
+            if (x < current->key[i] && x > current->key[i - 1]) {
+                result = current->key[i - 1];
+            } else if (x == current->key[i]) {
+                result = current->key[i];
+            }
+        }
+        return result;
 	}
 }
 
@@ -248,23 +256,145 @@ node* bptree::findParent(node* current, node* child) {
 	return parent;
 }
 
+int convert(char* str) {
+    if (str[0] == 'D') {
+        bool flag = false;
+        int num = 0;
+        int size = 7;
+        if (strlen(str) == 8) {
+            flag = true;
+        }
+        for (int i = 2; i < strlen(str); i++) {
+            int tmp = pow(10, size);
+            num = num + (str[i] - '0') * tmp;
+            size--;
+        }
+        if (flag) {
+            //num = num * -1;
+        }
+        return num;
+    } else {
+        int num = 0;
+        int size = 3;
+        for (int i = 0; i < strlen(str); i++) {
+            int tmp = pow(10, size);
+            num = num + (str[i] - '0') * tmp;
+            size--;
+        }
+        return num;
+    }
+}
+
+int inputConvert(char* str) {
+    if (str[0] == 'D') {
+        bool flag = false;
+        int num = 0;
+        int size = 7;
+        if (strlen(str) == 8) {
+            flag = true;
+        }
+        for (int i = 2; i < strlen(str); i++) {
+            int tmp = pow(10, size);
+            num = num + (str[i] - '0') * tmp;
+            size--;
+        }
+        if (flag) {
+            num = num * -1;
+        }
+        return num;
+    } else if (strlen(str) == 4) {
+        int num = 0;
+        int size = 3;
+        for (int i = 0; i < strlen(str); i++) {
+            int tmp = pow(10, size);
+            num = num + (str[i] - '0') * tmp;
+            size--;
+        }
+        return num;
+    } else {
+        cout << "input error: please input student ID or course ID" << endl;
+        return -1;
+    }
+}
+
 int main() {
 	bptree sid;
     bptree cid;
 
-    // read file - sid
+    // read file - sid to create b+ tree
     FILE *fp;
     fp = fopen("SID.txt", "r");
     while (!feof(fp)) {
         char temp[11];
         fscanf(fp, "%s", temp);
-        cout << temp << endl;
-        sid.insert(temp);
+        sid.insert(convert(temp));
+    }
+    fclose(fp);
+
+    // read file - cid to create b+ tree
+    fp = fopen("CID.txt", "r");
+    int record = 0;
+    while (!feof(fp)) {
+        char temp[16];
+        fscanf(fp, "%s", temp);
+        if (record != convert(temp)) {
+            cid.insert(record);
+        };
+        record = convert(temp);
+    }
+    fclose(fp);
+
+
+    char input[216];
+    cout << "Please input student ID or course ID: ";
+    scanf("%s", input);
+    int ans;
+    if (input[0] == 'D') {
+        ans = sid.search(abs(inputConvert(input)));
+    } else {
+        ans = cid.search(inputConvert(input));
+    } 
+
+    char filename[80][20];
+    if (input[0] == 'D') {
+        filename[0][0] = 'D';
+        filename[0][1] = '0';
+        if (strlen(input) == 8) {
+            int size = 7;
+            for (int i = 2; i < 8; i++) {
+                int tmp = pow(10, size);
+                filename[0][i] = (char)((int)ans/tmp + '0');
+                ans = ans % tmp;
+                size--;
+            } 
+            filename[0][8] = '.';
+            filename[0][9] = 'c';
+            filename[0][10] = 's';
+            filename[0][11] = 'v';
+            filename[0][12] = '\0';
+        } else {
+            int size = 7;
+            for (int i = 2; i < 10; i++) {
+                int tmp = pow(10, size);
+                filename[0][i] = ans/tmp + '0';
+                size--;
+            }
+            filename[0][10] = '.';
+            filename[0][11] = 'c';
+            filename[0][12] = 's';
+            filename[0][13] = 'v';
+            filename[0][14] = '\0';
+        }
+    } else {
     }
 
-
-    string input;
-    cin >> input;
+    if (input[0] == 'D') {
+        cout << "The file name is: ";
+        cout << filename[0] << endl;
+    } else {
+        cout << "The course ID is: ";
+        cout << ans << endl;
+    }
 
 
 	return 0;
