@@ -226,7 +226,7 @@ int bptree::search(int x) {
 		}
         int result = 0;
         for (int i = 0; i < current->size; i++) {
-        //    cout << x << ":" << current->key[i] << endl;  //in order to degug
+            cout << x << ":" << current->key[i] << endl;  //in order to degug
             if (x < current->key[i] && x > current->key[i - 1]) {
                 result = current->key[i - 1];
             } else if (x == current->key[i]) {
@@ -352,7 +352,7 @@ int main() {
         scanf("%s", input);
         if (strlen(input) == 8 && input[0] == 'D') {
             errorinput = false;
-        } else if (strlen(input) == 10 && input[0] != 'D') {
+        } else if (strlen(input) == 10 && input[0] == 'D') {
             errorinput = false;
         } else if (strlen(input) == 4) {
             errorinput = false;
@@ -372,10 +372,9 @@ int main() {
     char filename[80][22];
     if (input[0] == 'D') {
         filename[0][0] = 'D';
-        filename[0][1] = '0';
         if (strlen(input) == 8) {
-            int size = 7;
-            for (int i = 2; i < 8; i++) {
+            int size = 8;
+            for (int i = 1; i < 8; i++) {
                 int tmp = pow(10, size);
                 filename[0][i] = (char)((int)ans/tmp + '0');
                 ans = ans % tmp;
@@ -387,10 +386,11 @@ int main() {
             filename[0][11] = 'v';
             filename[0][12] = '\0';
         } else {
-            int size = 7;
-            for (int i = 2; i < 10; i++) {
+            int size = 8;
+            for (int i = 1; i < 10; i++) {
                 int tmp = pow(10, size);
                 filename[0][i] = ans/tmp + '0';
+                ans = ans % tmp;
                 size--;
             }
             filename[0][10] = '.';
