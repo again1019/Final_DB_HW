@@ -41,6 +41,7 @@ public:
 
 
 void bptree::insert(int x) {
+    //cout << x << endl;
     // insert a new node into the tree
 	if (root == NULL) {
 		root = new node;
@@ -343,9 +344,11 @@ int main() {
         fscanf(fp, "%s", temp);
         if (record != convert(temp)) {
             cid.insert(record);
+            //cout << record << endl;
         };
         record = convert(temp);
     }
+    cid.insert(record);
     fclose(fp);
 
 

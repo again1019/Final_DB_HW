@@ -346,6 +346,7 @@ int main() {
         };
         record = convert(temp);
     }
+    cid.insert(record);
     fclose(fp);
 
 
