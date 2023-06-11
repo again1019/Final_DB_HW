@@ -232,7 +232,7 @@ int bptree::search(int x) {
             	return current->key[0];
 		}
         for (int i = 0; i < current->size; i++) {
-            cout << x << ":" << current->key[i] << endl;  //in order to degug
+//            cout << x << ":" << current->key[i] << endl;  //in order to degug
             if (abs(x) < abs(current->key[i]) && abs(x) > abs(current->key[i - 1])) {
                 result = current->key[i - 1];
             } else if (abs(x) == abs(current->key[i])) {
@@ -345,7 +345,7 @@ int main() {
     while (!feof(fp)) {
         char temp[16];
         fscanf(fp, "%s", temp);
-        printf("%s\n",temp);
+//        printf("%s\n",temp);
         if (record != convert(temp)) {
             cid.insert(record);
         };
