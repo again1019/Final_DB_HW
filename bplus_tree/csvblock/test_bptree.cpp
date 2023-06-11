@@ -349,7 +349,7 @@ int main() {
     bool errorinput = true;
     while (errorinput) {
         cout << "Please input student ID or course ID: ";
-        scanf("%s", input);
+        scanf("%11s", input);
         if (strlen(input) == 8 && input[0] == 'D') {
             errorinput = false;
         } else if (strlen(input) == 10 && input[0] == 'D') {
@@ -370,6 +370,7 @@ int main() {
     // ============ get filename ============    
     int fileNum = 1;
     char filename[80][22];
+    memset(filename, 0, sizeof(filename));
     if (input[0] == 'D') {
         filename[0][0] = 'D';
         if (strlen(input) == 8) {
@@ -421,11 +422,11 @@ int main() {
                         break;
                     }
                 }
-                filename[i][j-1] = '.';
-                filename[i][j] = 'c';
-                filename[i][j+1] = 's';
-                filename[i][j+2] = 'v';
-                filename[i][j+3] = '\0';
+                filename[i][j] = '.';
+                filename[i][j+1] = 'c';
+                filename[i][j+2] = 's';
+                filename[i][j+3] = 'v';
+                filename[i][j+4] = '\0';
                 i++;
             }
         }
