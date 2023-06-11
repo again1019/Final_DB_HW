@@ -440,16 +440,13 @@ int main() {
     }
     
     // ========= sequence search by csv =========
-    // To 黃豆
-    // 要自己加上路徑 "./block/sid" + filename[i]
-    // 判斷是 SID or CID 用 input[0] == 'D' 來判斷
-    const char* S_directory = "C:/Users/88690/Desktop/FINAL/sid/block/sid";
-	const char* C_directory = "C:/Users/88690/Desktop/FINAL/cid_block/block/cid";
+    const char* S_directory = "./sid/block/sid";
+	const char* C_directory = "./cid_block/block/cid";
 
     char filepath[256];	
     if (input[0] == 'D') {
     		snprintf(filepath, sizeof(filepath), "%s/%s", S_directory, filename[fileNum - 1]);
-    		printf("\n=====================================\n\n學號:%s\n路徑:%s\n選課程代碼:\n",input,filepath);
+    		printf("\n=====================================\n\nSID:%s\nfilepath:%s\nCID:\n",input,filepath);
     		FILE* file = fopen(filepath, "r");
 		    char line[50];
 		    int compare = 0;
@@ -486,7 +483,7 @@ int main() {
 		        }
 		    }
 		    if(out == 0) {
-	        	printf("查無資料\n");
+	        	printf("not found\n");
 			}
 			printf("\n");
 
@@ -496,7 +493,7 @@ int main() {
 //			if(strcmp(input,filename[i],4))
 //				break;
         	snprintf(filepath, sizeof(filepath), "%s/%s", C_directory, filename[i]);
-        	printf("\n=====================================\n\n選課程代碼:%s\n路徑:%s\n學號:\n",input,filepath);
+        	printf("\n=====================================\n\nCID:%s\nfilenpath:%s\nSID:\n",input,filepath);
     		FILE* file = fopen(filepath, "r");
 		    char line[50];
 		    int compare = 0;
@@ -528,7 +525,7 @@ int main() {
 		        }
 		    }
 //		    if(out == 0) {
-//	        	printf("查無資料\n");
+//	        	printf("not found\n");
 //			}
 			printf("\n");
 
