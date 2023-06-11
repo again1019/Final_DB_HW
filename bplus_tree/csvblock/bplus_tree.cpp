@@ -446,8 +446,8 @@ int main() {
 
     
     // ========= output file name & sequence search by csv =========
-    const char* S_directory = "./sid/block/sid";
-	const char* C_directory = "./cid_block/block/cid";
+    const char* S_directory = "./block/sid";
+	const char* C_directory = "./block/cid";
 
     char filepath[256];	
     if (input[0] == 'D') {
