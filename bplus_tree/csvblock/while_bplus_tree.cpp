@@ -50,7 +50,7 @@ void bptree::insert(int x) {
 	} else {
 		node* current = root;
 		node* parent;
-        
+		
         // if current node is not a leaf, then go to the leaf
 		while (!current->isLeaf) {
 			parent = current;
@@ -67,7 +67,7 @@ void bptree::insert(int x) {
 				}
 			}
 		}
-
+		
 		// reached leaf;
 		if (current->size < bucketSize) { // if the node to be inserted is not filled
 			int i = 0;
@@ -139,6 +139,7 @@ void bptree::insert(int x) {
 			} else {
 				shiftLevel(newLeaf->key[0], parent, newLeaf);
             }
+//            printf("%s\n",current->key[i]);
 		}
 	}
 }
@@ -227,6 +228,9 @@ int bptree::search(int x) {
 			}
 		}
         int result = 0;
+        if (abs(x) < abs(current->key[0])) {
+            	return current->key[0];
+		}
         for (int i = 0; i < current->size; i++) {
             cout << x << ":" << current->key[i] << endl;  //in order to degug
             if (abs(x) < abs(current->key[i]) && abs(x) > abs(current->key[i - 1])) {
@@ -341,10 +345,12 @@ int main() {
     while (!feof(fp)) {
         char temp[16];
         fscanf(fp, "%s", temp);
+        printf("%s\n",temp);
         if (record != convert(temp)) {
             cid.insert(record);
         };
         record = convert(temp);
+//        memset(temp,0,sizeof(temp));
     }
     cid.insert(record);
     fclose(fp);
@@ -352,7 +358,7 @@ int main() {
 
     // ============ input ============
     char input[216];
-    // bool errorinput = true;    <---------------------------------------------------------------------------------- here is the problem 
+//     bool errorinput = true;    //<---------------------------------------------------------------------------------- here is the problem 
 	bool Flag = true;
 	
 	while(Flag){
@@ -465,7 +471,15 @@ int main() {
 		const char* C_directory = "./block/cid";
 	
 	    char filepath[256];	
+
 	    if (input[0] == 'D') {
+	    	if (atoi(input + 1) < atoi(filename[fileNum - 1] + 1) ) {
+		    	printf("\n=====================================\n\nSID:%s\nfilepath:null\nCID:\nnot found\n",input);
+				printf("\n=====================================\n\n");
+	
+				continue;	
+			} 
+			
 	    	cout << "\n=====================================\nThe file name is: ";
 			cout << filename[fileNum - 1] << endl;
 			
@@ -473,37 +487,34 @@ int main() {
 			printf("\nSID:%s\nfilepath:%s\nCID:\n",input,filepath);
 			FILE* file = fopen(filepath, "r");
 		    char line[50];
-		    int compare = 0;
 		    char *field;
 		    char fieldBuffer[100];
 		    int j = 0;
-		    if (fgets(line, 50, file) != NULL) {
-	//       				 printf("%s", line);
-		    }
-	
-			int flag = 1;
-			int out = 0;
+			int out = 1;
+			int flag = 0;
+			
+			fgets(line, 50, file);
 		    while (fgets(line, 100, file) != NULL) {
 		        field = strtok(line, ",");
 		        while (field != NULL) {
-		        	if (flag > 0){ 
+		        	if (out > 0){ 
 		            	sscanf(field, " %255[^,\n]",  fieldBuffer);
 		            	if (strcmp(fieldBuffer, input) == 0){
-							out = 1;
+							flag = 1;
 						}
 		            } else {
-		            	if (out == 1){
+		            	if (flag == 1){
 		            		sscanf(field, " %255[^,\n]",  fieldBuffer);
 		            		printf("%s\n",fieldBuffer);
-		            		out = 9;
+		            		flag = 9;
 						}
 					}
 	
 		            field = strtok(NULL, ",");
-		            flag *= -1;
+		            out *= -1;
 		        }
 		    }
-		    if(out == 0) {
+		    if(flag == 0) {
 	        	printf("not found\n");
 			}
 			printf("\n");
@@ -511,6 +522,7 @@ int main() {
 	        fclose(file);	
 		} else {
 			int check = 1;
+			
 			for (int j = 0; j < 4 ; ++j) {
 				if (input[j] != filename[0][j]){
 					check = 0;
@@ -519,7 +531,7 @@ int main() {
 			}
 	
 			if (check){
-				cout << "The file name is: ";
+				cout << "The file name is:\n";
 			    for (int i = 0; i < fileNum; i++) {
 			        cout << filename[i] << endl;
 			    }
@@ -527,21 +539,18 @@ int main() {
 					snprintf(filepath, sizeof(filepath), "%s/%s", C_directory, filename[i]);
 		        	printf("\n=====================================\n\nCID:%s\nfilepath:%s\nSID:\n",input,filepath);
 		    		FILE* file = fopen(filepath, "r");
+		    		
 				    char line[50];
-				    int compare = 0;
 				    char *field;
 				    char fieldBuffer[100];
 				    int j = 0;
-				    if (fgets(line, 50, file) != NULL) {
-		//       				 printf("%s", line);
-				    }
+				    fgets(line, 50, file);
 		
-					int flag = 1;
-					int out = 0;
+					int out = 1;
 				    while (fgets(line, 100, file) != NULL) {
 				        field = strtok(line, ",");
 				        while (field != NULL) {
-				        	if (flag > 0){ 
+				        	if (out > 0){ 
 				            	sscanf(field, " %255[^,\n]",  fieldBuffer);
 				           		printf("%s ",fieldBuffer);
 		
@@ -551,17 +560,24 @@ int main() {
 							}
 		
 				            field = strtok(NULL, ",");
-				            flag *= -1;
+				            out *= -1;
 				        }
 				    }
 	
 					printf("\n");
 			        fclose(file);
 				}
-	    	}
+	    	} else {
+		       	printf("\n=====================================\n\nCID:%s\nfilepath:null\nSID:\nnot found\n",input);
+			}
 		}
+		
+		printf("\n=====================================\n\n");
+		
 	}
+    
 	
+
 	return 0;
 }
 
