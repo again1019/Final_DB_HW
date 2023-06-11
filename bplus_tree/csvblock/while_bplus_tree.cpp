@@ -351,10 +351,11 @@ int main() {
 
     // ============ input ============
     char input[216];
-    bool errorinput = true;    
+    // bool errorinput = true;    <---------------------------------------------------------------------------------- here is the problem 
 	bool Flag = true;
 	
 	while(Flag){
+        bool errorinput = true;    
 		while (errorinput) {
 	        cout << "Please input student ID or course ID : ";
 	        scanf("%11s", input);
@@ -380,6 +381,7 @@ int main() {
 	            cout << "input error: " ;
 	        }
 	    }
+
 	    if (! Flag) break;
 	    int ans;
 	    if (input[0] == 'D') {
