@@ -57,7 +57,7 @@ void bptree::insert(int x) {
             // | < a | A | a <= x < b | B | >= b | 
             // |  i  | i |     i+1    |i+1| i+2  | 
 			for (int i = 0; i < current->size; i++) {
-				if (x < current->key[i]) {
+				if (abs(x) < abs(current->key[i])) {
 					current = current->ptr[i];
 					break;
 				}
@@ -73,7 +73,7 @@ void bptree::insert(int x) {
 			int i = 0;
 
 			// find the right position of element to be inserted
-			while (x > current->key[i] && i < current->size)
+			while (abs(x) > abs(current->key[i]) && i < current->size)
 				// go to ptr where needs to be inserted.
 				i++;
 			for (int j = current->size; j > i; j--)
@@ -98,7 +98,7 @@ void bptree::insert(int x) {
 			int i = 0, j;
 
 			// find the right position of element to be inserted
-			while (x > current->key[i] && i < bucketSize)
+			while (abs(x) > abs(current->key[i]) && i < bucketSize)
 				i++;
 			for (int j = bucketSize + 1; j > i; j--)
 				// adjust the elements to make space for new element
@@ -147,7 +147,7 @@ void bptree::shiftLevel(int x, node* current, node* child) {
     // insert or create an internal node;
 	if (current->size < bucketSize) { // if it is not full
 		int i = 0;
-		while (x > current->key[i] && i < current->size)
+		while (abs(x) > abs(current->key[i]) && i < current->size)
 			i++;
 		for (int j = current->size; j > i; j--) {
 			current->key[j] = current->key[j - 1];
@@ -171,7 +171,7 @@ void bptree::shiftLevel(int x, node* current, node* child) {
 			tempPtr[i] = current->ptr[i];
 
 		int i = 0, j;
-		while (x > current->key[i] && i < bucketSize)
+		while (abs(x) > abs(current->key[i]) && i < bucketSize)
 			i++;
 
 		for (int j = bucketSize + 1; j > i; j--)
@@ -216,7 +216,7 @@ int bptree::search(int x) {
         // find the leaf node
 		while (current->isLeaf == false) {
 			for (int i = 0; i < current->size; i++) {
-				if (x < current->key[i]) {
+				if (abs(x) < abs(current->key[i])) {
 					current = current->ptr[i];
                     break;
 				}
@@ -229,11 +229,11 @@ int bptree::search(int x) {
         int result = 0;
         for (int i = 0; i < current->size; i++) {
             cout << x << ":" << current->key[i] << endl;  //in order to degug
-            if (x < current->key[i] && x > current->key[i - 1]) {
+            if (abs(x) < abs(current->key[i]) && abs(x) > abs(current->key[i - 1])) {
                 result = current->key[i - 1];
-            } else if (x == current->key[i]) {
+            } else if (abs(x) == abs(current->key[i])) {
                 result = current->key[i];
-            } else if (x > current->key[i] && i == current->size - 1) {
+            } else if (abs(x) > abs(current->key[i]) && i == current->size - 1) {
                 result = current->key[i];
             }
         }
@@ -274,7 +274,7 @@ int convert(char* str) {
             size--;
         }
         if (flag) {
-            //num = num * -1;
+            num = num * -1;
         }
         return num;
     } else {
@@ -301,6 +301,9 @@ int inputConvert(char* str) {
             int tmp = pow(10, size);
             num = num + (str[i] - '0') * tmp;
             size--;
+        }
+        if (flag) {
+            num = num * -1;
         }
         return num;
     } else if (strlen(str) == 4) {
@@ -383,8 +386,9 @@ int main() {
     memset(filename, 0, sizeof(filename));
     if (input[0] == 'D') {
         filename[0][0] = 'D';
-        if (strlen(input) == 8) {
+        if (ans < 0) {
             int size = 8;
+            ans = ans * -1;
             for (int i = 1; i < 8; i++) {
                 int tmp = pow(10, size);
                 filename[0][i] = (char)((int)ans/tmp + '0');
