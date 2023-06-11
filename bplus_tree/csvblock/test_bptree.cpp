@@ -226,10 +226,12 @@ int bptree::search(int x) {
 		}
         int result = 0;
         for (int i = 0; i < current->size; i++) {
-            cout << x << ":" << current->key[i] << endl;  //in order to degug
+        //    cout << x << ":" << current->key[i] << endl;  //in order to degug
             if (x < current->key[i] && x > current->key[i - 1]) {
                 result = current->key[i - 1];
             } else if (x == current->key[i]) {
+                result = current->key[i];
+            } else if (x > current->key[i] && i == current->size - 1) {
                 result = current->key[i];
             }
         }
@@ -260,11 +262,11 @@ int convert(char* str) {
     if (str[0] == 'D') {
         bool flag = false;
         int num = 0;
-        int size = 7;
+        int size = 8;
         if (strlen(str) == 8) {
             flag = true;
         }
-        for (int i = 2; i < strlen(str); i++) {
+        for (int i = 1; i < strlen(str); i++) {
             int tmp = pow(10, size);
             num = num + (str[i] - '0') * tmp;
             size--;
@@ -289,17 +291,14 @@ int inputConvert(char* str) {
     if (str[0] == 'D') {
         bool flag = false;
         int num = 0;
-        int size = 7;
+        int size = 8;
         if (strlen(str) == 8) {
             flag = true;
         }
-        for (int i = 2; i < strlen(str); i++) {
+        for (int i = 1; i < strlen(str); i++) {
             int tmp = pow(10, size);
             num = num + (str[i] - '0') * tmp;
             size--;
-        }
-        if (flag) {
-            num = num * -1;
         }
         return num;
     } else if (strlen(str) == 4) {
@@ -317,11 +316,12 @@ int inputConvert(char* str) {
     }
 }
 
+
 int main() {
 	bptree sid;
     bptree cid;
-
-    // read file - sid to create b+ tree
+    
+    // ========== create b+ tree ==========
     FILE *fp;
     fp = fopen("SID.txt", "r");
     while (!feof(fp)) {
@@ -331,7 +331,6 @@ int main() {
     }
     fclose(fp);
 
-    // read file - cid to create b+ tree
     fp = fopen("CID.txt", "r");
     int record = 0;
     while (!feof(fp)) {
@@ -345,9 +344,22 @@ int main() {
     fclose(fp);
 
 
+    // ============ input ============
     char input[216];
-    cout << "Please input student ID or course ID: ";
-    scanf("%s", input);
+    bool errorinput = true;
+    while (errorinput) {
+        cout << "Please input student ID or course ID: ";
+        scanf("%s", input);
+        if (strlen(input) == 8 && input[0] == 'D') {
+            errorinput = false;
+        } else if (strlen(input) == 10 && input[0] != 'D') {
+            errorinput = false;
+        } else if (strlen(input) == 4) {
+            errorinput = false;
+        } else {
+            cout << "input error: " ;
+        }
+    }
     int ans;
     if (input[0] == 'D') {
         ans = sid.search(abs(inputConvert(input)));
@@ -355,7 +367,9 @@ int main() {
         ans = cid.search(inputConvert(input));
     } 
 
-    char filename[80][20];
+    // ============ get filename ============    
+    int fileNum = 1;
+    char filename[80][22];
     if (input[0] == 'D') {
         filename[0][0] = 'D';
         filename[0][1] = '0';
@@ -386,16 +400,48 @@ int main() {
             filename[0][14] = '\0';
         }
     } else {
+        char tmpstr[4]; 
+        int size = 3;
+        for (int i = 0; i < 4; i++) {
+            int tmp = pow(10, size);
+            tmpstr[i] = ans/tmp + '0';
+            ans = ans % tmp;
+            size--;
+        }
+        fp = fopen("CID.txt", "r");
+        int i = 0;
+        while (!feof(fp)) {
+            char buf[16];
+            fscanf(fp, "%s", buf);
+            if (buf[0] == tmpstr[0] && buf[1] == tmpstr[1] && buf[2] == tmpstr[2] && buf[3] == tmpstr[3]) {
+                int j = 0;
+                for (j = 0; j < 16; j++) {
+                    filename[i][j] = buf[j];
+                    if (buf[j] == '\0') {
+                        break;
+                    }
+                }
+                filename[i][j-1] = '.';
+                filename[i][j] = 'c';
+                filename[i][j+1] = 's';
+                filename[i][j+2] = 'v';
+                filename[i][j+3] = '\0';
+                i++;
+            }
+        }
+        fileNum = 1 + i;
     }
-
-    if (input[0] == 'D') {
-        cout << "The file name is: ";
-        cout << filename[0] << endl;
-    } else {
-        cout << "The course ID is: ";
-        cout << ans << endl;
+    
+    // ========= output file name =========
+    cout << "The file name is: ";
+    for (int i = 0; i < fileNum; i++) {
+        cout << filename[i] << endl;
     }
-
+    
+    // ========= sequence search by csv =========
+    // To 黃豆
+    // 要自己加上路徑 "./block/sid" + filename[i]
+    // 判斷是 SID or CID 用 input[0] == 'D' 來判斷
 
 	return 0;
 }
