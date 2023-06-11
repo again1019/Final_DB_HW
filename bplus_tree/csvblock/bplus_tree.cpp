@@ -388,7 +388,7 @@ int main() {
         filename[0][0] = 'D';
         if (ans < 0) {
             int size = 8;
-            ans = ans * -1;
+            ans = abs(ans);
             for (int i = 1; i < 8; i++) {
                 int tmp = pow(10, size);
                 filename[0][i] = (char)((int)ans/tmp + '0');
