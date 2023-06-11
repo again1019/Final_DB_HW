@@ -375,7 +375,7 @@ int main() {
     }
     int ans;
     if (input[0] == 'D') {
-        ans = sid.search(abs(inputConvert(input)));
+        ans = sid.search(inputConvert(input));
     } else {
         ans = cid.search(inputConvert(input));
     } 
