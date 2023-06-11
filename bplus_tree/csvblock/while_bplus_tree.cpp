@@ -1,9 +1,11 @@
 #include <bits/stdc++.h>
-//#include <conio.h>   //getch
+#include <dirent.h>
 
 using namespace std;
 
 int bucketSize = 10;
+char SID_index[5000][50] = {0};
+char CID_index[5000][500] = {0};
 
 // Create 2 classes, one for node and one for bptree;
 
@@ -325,12 +327,16 @@ int inputConvert(char* str) {
     }
 }
 
+void creat_SIDindex();
+void creat_CIDindex();
 
 int main() {
 	bptree sid;
     bptree cid;
     
     // ========== create b+ tree ==========
+//    creat_CIDindex();
+//    creat_SIDindex();
     FILE *fp;
     fp = fopen("SID.txt", "r");
     while (!feof(fp)) {
@@ -364,7 +370,7 @@ int main() {
 	while(Flag){
         bool errorinput = true;    
 		while (errorinput) {
-	        cout << "Please input student ID or course ID : ";
+	        cout << "Please input student ID or course ID (exit:99): ";
 	        scanf("%11s", input);
 	        if (strlen(input) == 8 && input[0] == 'D') {
 	            errorinput = false;
@@ -380,7 +386,6 @@ int main() {
 					}	
 				}
 	        } else if (strlen(input) == 2 && !strcmp(input,"99")) {
-	        	printf(".\n");
 	        	Flag = false;
 	        	break;
 	        	
@@ -473,22 +478,6 @@ int main() {
 	    char filepath[256];	
 
 	    if (input[0] == 'D') {
-	    	
-//	    	int num = 0;
-//	    	
-//	    	if (strlen(input) == 8) {
-//	    		num = atoi(input + 1) * 100;
-//			} else {
-//				num == atoi(input + 1);
-//			}
-//			
-//	    	if (num < atoi(filename[fileNum - 1] + 1) )  {
-//		    	printf("\n=====================================\n\nSID:%s\nfilepath:null\nCID:\nnot found\n", input);
-//				printf("\n=====================================\n\n");
-//	
-//				continue;	
-//			} 
-
 	    	cout << "\nThe file name is: ";
 			cout << filename[fileNum - 1] << endl;
 			
@@ -589,5 +578,77 @@ int main() {
 	
 
 	return 0;
+}
+
+void creat_SIDindex() {
+	const char* S_dir = "./block/sid";    
+    DIR* dir = opendir(S_dir);
+    if (dir == NULL) {
+        printf("not found: %s\n", S_dir);
+        return;
+    }
+    
+	struct dirent* entry;	
+    int file = 0;
+    int i = 0;
+    
+	while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+    	char* dot = strrchr(entry->d_name, '.');  
+	    if(dot) {
+	        *dot = '\0';  
+	    }
+		strcpy(SID_index[i], entry->d_name);
+		++i;
+    }
+    
+    SID_index[i][0] = '\0';
+    i = 0;
+    
+    while(SID_index[i][0] != '\0'){
+    	printf("%s\n",SID_index[i]);
+    	++i;
+	}
+    closedir(dir);
+	
+	return;
+}
+void creat_CIDindex() {
+	
+	const char* C_dir = "./block/cid";
+    DIR* dir = opendir(C_dir);
+    if (dir == NULL) {
+        printf("not found: %s\n", C_dir);
+        return;
+    }
+    
+	struct dirent* entry;	
+    int file = 0;
+    int i = 0;
+    
+	while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        char* dot = strrchr(entry->d_name, '.');  
+	    if(dot) {
+	        *dot = '\0';  
+	    }
+		strcpy(CID_index[i], entry->d_name);
+		++i;
+    }
+    
+    CID_index[i][0] = '\0';
+    i = 0;
+    
+    while(CID_index[i][0] != '\0'){
+    	printf("%s\n",CID_index[i]);
+    	++i;
+	}
+    closedir(dir);
+	
+	return;
 }
 
