@@ -1,4 +1,6 @@
 #include <bits/stdc++.h>
+#include <conio.h>   //getch
+
 using namespace std;
 
 int bucketSize = 10;
@@ -346,16 +348,24 @@ int main() {
 
     // ============ input ============
     char input[216];
-    bool errorinput = true;
+    bool errorinput = true;    
+
     while (errorinput) {
-        cout << "Please input student ID or course ID: ";
+        cout << "Please input student ID or course ID : ";
         scanf("%11s", input);
         if (strlen(input) == 8 && input[0] == 'D') {
             errorinput = false;
         } else if (strlen(input) == 10 && input[0] == 'D') {
             errorinput = false;
         } else if (strlen(input) == 4) {
-            errorinput = false;
+        	for (int i = 0; i < 4; ++i) {
+        		if (!isdigit(input[i])){
+        			errorinput = true;
+        			break;
+				}else{
+					errorinput = false;	
+				}	
+			}
         } else {
             cout << "input error: " ;
         }
@@ -433,106 +443,109 @@ int main() {
         fileNum = 1 + i;
     }
     
-    // ========= output file name =========
-    cout << "The file name is: ";
-    for (int i = 0; i < fileNum; i++) {
-        cout << filename[i] << endl;
-    }
+
     
-    // ========= sequence search by csv =========
+    // ========= output file name & sequence search by csv =========
     const char* S_directory = "./sid/block/sid";
 	const char* C_directory = "./cid_block/block/cid";
 
     char filepath[256];	
     if (input[0] == 'D') {
-    		snprintf(filepath, sizeof(filepath), "%s/%s", S_directory, filename[fileNum - 1]);
-    		printf("\n=====================================\n\nSID:%s\nfilepath:%s\nCID:\n",input,filepath);
-    		FILE* file = fopen(filepath, "r");
-		    char line[50];
-		    int compare = 0;
-		    char *field;
-		    char fieldBuffer[100];
-		    int j = 0;
-		    if (fgets(line, 50, file) != NULL) {
+    	cout << "\n=====================================\nThe file name is: ";
+		cout << filename[fileNum - 1] << endl;
+		
+		snprintf(filepath, sizeof(filepath), "%s/%s", S_directory, filename[fileNum - 1]);
+		printf("\nSID:%s\nfilepath:%s\nCID:\n",input,filepath);
+		FILE* file = fopen(filepath, "r");
+	    char line[50];
+	    int compare = 0;
+	    char *field;
+	    char fieldBuffer[100];
+	    int j = 0;
+	    if (fgets(line, 50, file) != NULL) {
 //       				 printf("%s", line);
-		    }
+	    }
 
-			int flag = 1;
-			int out = 0;
-		    while (fgets(line, 100, file) != NULL) {
-		        field = strtok(line, ",");
-		        while (field != NULL) {
-		        	if (flag > 0){ 
-		            	sscanf(field, " %255[^,\n]",  fieldBuffer);
-//		            	if(atoi(fieldBuffer+1) == input){
-		            	if (strcmp(fieldBuffer, input) == 0){
-//							printf("\n+-+- %d/n", strcmp(fieldBuffer, input));
-							out = 1;
-						}
-		            } else {
-		            	if (out == 1){
-		            		sscanf(field, " %255[^,\n]",  fieldBuffer);
-		            		printf("%s\n",fieldBuffer);
-		            		out = 9;
-						}
+		int flag = 1;
+		int out = 0;
+	    while (fgets(line, 100, file) != NULL) {
+	        field = strtok(line, ",");
+	        while (field != NULL) {
+	        	if (flag > 0){ 
+	            	sscanf(field, " %255[^,\n]",  fieldBuffer);
+	            	if (strcmp(fieldBuffer, input) == 0){
+						out = 1;
 					}
-//            		printf("%s\n",fieldBuffer);
-
-		            field = strtok(NULL, ",");
-		            flag *= -1;
-		        }
-		    }
-		    if(out == 0) {
-	        	printf("not found\n");
-			}
-			printf("\n");
-
-	        fclose(file);	
-	} else {
-		for (int i = 0; i < fileNum - 1; i++) {
-//			if(strcmp(input,filename[i],4))
-//				break;
-        	snprintf(filepath, sizeof(filepath), "%s/%s", C_directory, filename[i]);
-        	printf("\n=====================================\n\nCID:%s\nfilenpath:%s\nSID:\n",input,filepath);
-    		FILE* file = fopen(filepath, "r");
-		    char line[50];
-		    int compare = 0;
-		    char *field;
-		    char fieldBuffer[100];
-		    int j = 0;
-		    if (fgets(line, 50, file) != NULL) {
-//       				 printf("%s", line);
-		    }
-
-			int flag = 1;
-			int out = 0;
-		    while (fgets(line, 100, file) != NULL) {
-		        field = strtok(line, ",");
-		        while (field != NULL) {
-		        	if (flag > 0){ 
-		            	sscanf(field, " %255[^,\n]",  fieldBuffer);
-		           		printf("%s ",fieldBuffer);
-
-		            } else {
+	            } else {
+	            	if (out == 1){
 	            		sscanf(field, " %255[^,\n]",  fieldBuffer);
-//	            		printf("%s\n",fieldBuffer);
-
+	            		printf("%s\n",fieldBuffer);
+	            		out = 9;
 					}
-//            		printf("%s\n",fieldBuffer);
+				}
 
-		            field = strtok(NULL, ",");
-		            flag *= -1;
-		        }
+	            field = strtok(NULL, ",");
+	            flag *= -1;
+	        }
+	    }
+	    if(out == 0) {
+        	printf("not found\n");
+		}
+		printf("\n");
+
+        fclose(file);	
+	} else {
+		int check = 1;
+		for (int j = 0; j < 4 ; ++j) {
+			if (input[j] != filename[0][j]){
+				check = 0;
+				break;
+			}
+		}
+
+		if (check){
+			cout << "The file name is: ";
+		    for (int i = 0; i < fileNum; i++) {
+		        cout << filename[i] << endl;
 		    }
-//		    if(out == 0) {
-//	        	printf("not found\n");
-//			}
-			printf("\n");
+			for (int i = 0; i < fileNum - 1; i++) {
+				snprintf(filepath, sizeof(filepath), "%s/%s", C_directory, filename[i]);
+	        	printf("\n=====================================\n\nCID:%s\nfilepath:%s\nSID:\n",input,filepath);
+	    		FILE* file = fopen(filepath, "r");
+			    char line[50];
+			    int compare = 0;
+			    char *field;
+			    char fieldBuffer[100];
+			    int j = 0;
+			    if (fgets(line, 50, file) != NULL) {
+	//       				 printf("%s", line);
+			    }
+	
+				int flag = 1;
+				int out = 0;
+			    while (fgets(line, 100, file) != NULL) {
+			        field = strtok(line, ",");
+			        while (field != NULL) {
+			        	if (flag > 0){ 
+			            	sscanf(field, " %255[^,\n]",  fieldBuffer);
+			           		printf("%s ",fieldBuffer);
+	
+			            } else {
+		            		sscanf(field, " %255[^,\n]",  fieldBuffer);
+	
+						}
+	
+			            field = strtok(NULL, ",");
+			            flag *= -1;
+			        }
+			    }
 
-	        fclose(file);
-
+				printf("\n");
+		        fclose(file);
+			}
     	}
 	}
+	
 
 	return 0;
 }
