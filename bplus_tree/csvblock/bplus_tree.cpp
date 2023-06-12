@@ -1,9 +1,11 @@
 #include <bits/stdc++.h>
-//#include <conio.h>   //getch
+#include <dirent.h>
 
 using namespace std;
 
 int bucketSize = 10;
+char SID_index[5000][50] = {0};
+char CID_index[5000][500] = {0};
 
 // Create 2 classes, one for node and one for bptree;
 
@@ -41,7 +43,6 @@ public:
 
 
 void bptree::insert(int x) {
-    //cout << x << endl;
     // insert a new node into the tree
 	if (root == NULL) {
 		root = new node;
@@ -51,7 +52,7 @@ void bptree::insert(int x) {
 	} else {
 		node* current = root;
 		node* parent;
-        
+		
         // if current node is not a leaf, then go to the leaf
 		while (!current->isLeaf) {
 			parent = current;
@@ -68,7 +69,7 @@ void bptree::insert(int x) {
 				}
 			}
 		}
-
+		
 		// reached leaf;
 		if (current->size < bucketSize) { // if the node to be inserted is not filled
 			int i = 0;
@@ -140,6 +141,7 @@ void bptree::insert(int x) {
 			} else {
 				shiftLevel(newLeaf->key[0], parent, newLeaf);
             }
+//            printf("%s\n",current->key[i]);
 		}
 	}
 }
@@ -228,8 +230,11 @@ int bptree::search(int x) {
 			}
 		}
         int result = 0;
+        if (abs(x) < abs(current->key[0])) {
+            	return current->key[0];
+		}
         for (int i = 0; i < current->size; i++) {
-            cout << x << ":" << current->key[i] << endl;  //in order to degug
+//            cout << x << ":" << current->key[i] << endl;  //in order to degug
             if (abs(x) < abs(current->key[i]) && abs(x) > abs(current->key[i - 1])) {
                 result = current->key[i - 1];
             } else if (abs(x) == abs(current->key[i])) {
@@ -322,12 +327,17 @@ int inputConvert(char* str) {
     }
 }
 
+void creat_SIDindex();
+void creat_CIDindex();
 
 int main() {
 	bptree sid;
     bptree cid;
     
     // ========== create b+ tree ==========
+    
+//    creat_CIDindex();
+//    creat_SIDindex();
     FILE *fp;
     fp = fopen("SID.txt", "r");
     while (!feof(fp)) {
@@ -344,7 +354,6 @@ int main() {
         fscanf(fp, "%s", temp);
         if (record != convert(temp)) {
             cid.insert(record);
-            //cout << record << endl;
         };
         record = convert(temp);
     }
@@ -354,206 +363,358 @@ int main() {
 
     // ============ input ============
     char input[216];
-    bool errorinput = true;    
-
-    while (errorinput) {
-        cout << "Please input student ID or course ID : ";
-        scanf("%11s", input);
-        if (strlen(input) == 8 && input[0] == 'D') {
-            errorinput = false;
-        } else if (strlen(input) == 10 && input[0] == 'D') {
-            errorinput = false;
-        } else if (strlen(input) == 4) {
-        	for (int i = 0; i < 4; ++i) {
-        		if (!isdigit(input[i])){
-        			errorinput = true;
-        			break;
-				}else{
-					errorinput = false;	
-				}	
-			}
-        } else {
-            cout << "input error: " ;
-        }
-    }
-    int ans;
-    if (input[0] == 'D') {
-        ans = sid.search(inputConvert(input));
-    } else {
-        ans = cid.search(inputConvert(input));
-    } 
-
-    // ============ get filename ============    
-    int fileNum = 1;
-    char filename[80][22];
-    memset(filename, 0, sizeof(filename));
-    if (input[0] == 'D') {
-        filename[0][0] = 'D';
-        if (ans < 0) {
-            int size = 8;
-            ans = abs(ans);
-            for (int i = 1; i < 8; i++) {
-                int tmp = pow(10, size);
-                filename[0][i] = (char)((int)ans/tmp + '0');
-                ans = ans % tmp;
-                size--;
-            } 
-            filename[0][8] = '.';
-            filename[0][9] = 'c';
-            filename[0][10] = 's';
-            filename[0][11] = 'v';
-            filename[0][12] = '\0';
-        } else {
-            int size = 8;
-            for (int i = 1; i < 10; i++) {
-                int tmp = pow(10, size);
-                filename[0][i] = ans/tmp + '0';
-                ans = ans % tmp;
-                size--;
-            }
-            filename[0][10] = '.';
-            filename[0][11] = 'c';
-            filename[0][12] = 's';
-            filename[0][13] = 'v';
-            filename[0][14] = '\0';
-        }
-    } else {
-        char tmpstr[4]; 
-        int size = 3;
-        for (int i = 0; i < 4; i++) {
-            int tmp = pow(10, size);
-            tmpstr[i] = ans/tmp + '0';
-            ans = ans % tmp;
-            size--;
-        }
-        fp = fopen("CID.txt", "r");
-        int i = 0;
-        while (!feof(fp)) {
-            char buf[16];
-            fscanf(fp, "%s", buf);
-            if (buf[0] == tmpstr[0] && buf[1] == tmpstr[1] && buf[2] == tmpstr[2] && buf[3] == tmpstr[3]) {
-                int j = 0;
-                for (j = 0; j < 16; j++) {
-                    filename[i][j] = buf[j];
-                    if (buf[j] == '\0') {
-                        break;
-                    }
-                }
-                filename[i][j] = '.';
-                filename[i][j+1] = 'c';
-                filename[i][j+2] = 's';
-                filename[i][j+3] = 'v';
-                filename[i][j+4] = '\0';
-                i++;
-            }
-        }
-        fileNum = 1 + i;
-    }
-    
-
-    
-    // ========= output file name & sequence search by csv =========
-    const char* S_directory = "./block/sid";
-	const char* C_directory = "./block/cid";
-
-    char filepath[256];	
-    if (input[0] == 'D') {
-    	cout << "\n=====================================\nThe file name is: ";
-		cout << filename[fileNum - 1] << endl;
-		
-		snprintf(filepath, sizeof(filepath), "%s/%s", S_directory, filename[fileNum - 1]);
-		printf("\nSID:%s\nfilepath:%s\nCID:\n",input,filepath);
-		FILE* file = fopen(filepath, "r");
-	    char line[50];
-	    int compare = 0;
-	    char *field;
-	    char fieldBuffer[100];
-	    int j = 0;
-	    if (fgets(line, 50, file) != NULL) {
-//       				 printf("%s", line);
-	    }
-
-		int flag = 1;
-		int out = 0;
-	    while (fgets(line, 100, file) != NULL) {
-	        field = strtok(line, ",");
-	        while (field != NULL) {
-	        	if (flag > 0){ 
-	            	sscanf(field, " %255[^,\n]",  fieldBuffer);
-	            	if (strcmp(fieldBuffer, input) == 0){
-						out = 1;
-					}
-	            } else {
-	            	if (out == 1){
-	            		sscanf(field, " %255[^,\n]",  fieldBuffer);
-	            		printf("%s\n",fieldBuffer);
-	            		out = 9;
-					}
+	bool Flag = true;
+	
+	while(Flag){
+        bool errorinput = true;    
+		while (errorinput) {
+	        cout << "Please input student ID or course ID (exit:99): ";
+	        scanf("%11s", input);
+	        if (strlen(input) == 8 && input[0] == 'D') {
+	            errorinput = false;
+	        } else if (strlen(input) == 10 && input[0] == 'D') {
+	            errorinput = false;
+	        } else if (strlen(input) == 4) {
+	        	for (int i = 0; i < 4; ++i) {
+	        		if (!isdigit(input[i])){
+	        			errorinput = true;
+	        			break;
+					}else{
+						errorinput = false;	
+					}	
 				}
-
-	            field = strtok(NULL, ",");
-	            flag *= -1;
+	        } else if (strlen(input) == 2 && !strcmp(input,"99")) {
+	        	Flag = false;
+	        	break;
+	        	
+			} else {
+	            cout << "input error: " ;
 	        }
 	    }
-	    if(out == 0) {
-        	printf("not found\n");
-		}
-		printf("\n");
 
-        fclose(file);	
-	} else {
-		int check = 1;
-		for (int j = 0; j < 4 ; ++j) {
-			if (input[j] != filename[0][j]){
-				check = 0;
-				break;
+	    if (! Flag) break;
+	    int ans;
+	    if (input[0] == 'D') {
+	        ans = sid.search(inputConvert(input));
+	    } else {
+	        ans = cid.search(inputConvert(input));
+	    } 
+	
+	    // ============ get filename ============    
+	    int fileNum = 1;
+	    char filename[80][22];
+	    memset(filename, 0, sizeof(filename));
+	    if (input[0] == 'D') {
+	        filename[0][0] = 'D';
+	        if (ans < 0) {
+	            int size = 8;
+	            ans = abs(ans);
+	            for (int i = 1; i < 8; i++) {
+	                int tmp = pow(10, size);
+	                filename[0][i] = (char)((int)ans/tmp + '0');
+	                ans = ans % tmp;
+	                size--;
+	            } 
+	            filename[0][8] = '.';
+	            filename[0][9] = 'c';
+	            filename[0][10] = 's';
+	            filename[0][11] = 'v';
+	            filename[0][12] = '\0';
+	        } else {
+	            int size = 8;
+	            for (int i = 1; i < 10; i++) {
+	                int tmp = pow(10, size);
+	                filename[0][i] = ans/tmp + '0';
+	                ans = ans % tmp;
+	                size--;
+	            }
+	            filename[0][10] = '.';
+	            filename[0][11] = 'c';
+	            filename[0][12] = 's';
+	            filename[0][13] = 'v';
+	            filename[0][14] = '\0';
+	        }
+	    } else {
+	        char tmpstr[4]; 
+	        int size = 3;
+	        for (int i = 0; i < 4; i++) {
+	            int tmp = pow(10, size);
+	            tmpstr[i] = ans/tmp + '0';
+	            ans = ans % tmp;
+	            size--;
+	        }
+	        fp = fopen("CID.txt", "r");
+	        int i = 0;
+	        while (!feof(fp)) {
+	            char buf[16];
+	            fscanf(fp, "%s", buf);
+	            if (buf[0] == tmpstr[0] && buf[1] == tmpstr[1] && buf[2] == tmpstr[2] && buf[3] == tmpstr[3]) {
+	                int j = 0;
+	                for (j = 0; j < 16; j++) {
+	                    filename[i][j] = buf[j];
+	                    if (buf[j] == '\0') {
+	                        break;
+	                    }
+	                }
+	                filename[i][j] = '.';
+	                filename[i][j+1] = 'c';
+	                filename[i][j+2] = 's';
+	                filename[i][j+3] = 'v';
+	                filename[i][j+4] = '\0';
+	                i++;
+	            }
+	        }
+	        fileNum = 1 + i;
+	    }
+	    
+	    // ========= output file name & sequence search by csv =========
+	    const char* S_directory = "./block/sid";
+		const char* C_directory = "./block/cid";
+	
+	    char filepath[256];	
+
+	    if (input[0] == 'D') {
+	    	
+	    	int num_input = 0;
+	    	int num_file = 0;
+	    	
+	    	if (strlen(input) == 8) {
+	    		num_input = atoi(input + 1) * 100;
+			} else {
+				num_input = atoi(input + 1);
 			}
-		}
-
-		if (check){
-			cout << "The file name is: ";
-		    for (int i = 0; i < fileNum; i++) {
-		        cout << filename[i] << endl;
-		    }
-			for (int i = 0; i < fileNum - 1; i++) {
-				snprintf(filepath, sizeof(filepath), "%s/%s", C_directory, filename[i]);
-	        	printf("\n=====================================\n\nCID:%s\nfilepath:%s\nSID:\n",input,filepath);
-	    		FILE* file = fopen(filepath, "r");
-			    char line[50];
-			    int compare = 0;
-			    char *field;
-			    char fieldBuffer[100];
-			    int j = 0;
-			    if (fgets(line, 50, file) != NULL) {
-	//       				 printf("%s", line);
-			    }
+			
+			if (strlen(filename[fileNum - 1]) == 12) {
+	    		num_file = atoi(filename[fileNum - 1] + 1) * 100;
+			} else {
+				num_file = atoi(filename[fileNum - 1] + 1);
+			}
+			
+			
+	    	if (num_input < num_file)  {
+	    		
+		    	printf("\n\nSID:%s\nfilepath:null\nCID:\nnot found\n", input);
+				printf("\n=====================================\n\n");
 	
-				int flag = 1;
-				int out = 0;
-			    while (fgets(line, 100, file) != NULL) {
-			        field = strtok(line, ",");
-			        while (field != NULL) {
-			        	if (flag > 0){ 
-			            	sscanf(field, " %255[^,\n]",  fieldBuffer);
-			           		printf("%s ",fieldBuffer);
-	
-			            } else {
-		            		sscanf(field, " %255[^,\n]",  fieldBuffer);
-	
+				continue;	
+			} 
+	    	
+	    	cout << "\nThe file name is: ";
+			cout << filename[fileNum - 1] << endl;
+			
+			snprintf(filepath, sizeof(filepath), "%s/%s", S_directory, filename[fileNum - 1]);
+			printf("\nSID:%s\nfilepath:%s\nCID:\n", input, filepath);
+			
+			FILE* file = fopen(filepath, "r");
+			
+		    char line[50];
+		    char *field;
+		    char fieldBuffer[100];
+			int out = 1;
+			int flag = 0;
+			
+			fgets(line, 50, file);
+			
+		    while (fgets(line, 100, file) != NULL) {
+		    	
+		        field = strtok(line, ",");
+		        
+		        while (field != NULL) {
+		        	
+		        	if (out > 0) { 
+		        	
+		            	sscanf(field, " %255[^,\n]",  fieldBuffer);
+		            	
+		            	if (strcmp(fieldBuffer, input) == 0) {
+							flag = 1;
 						}
+						
+		            } else {
+		            	
+		            	if (flag == 1) {
+		            		sscanf(field, " %255[^,\n]",  fieldBuffer);
+		            		printf("%s\n", fieldBuffer);
+		            		flag = 9;
+						}
+						
+					}
 	
-			            field = strtok(NULL, ",");
-			            flag *= -1;
-			        }
-			    }
-
-				printf("\n");
-		        fclose(file);
+		            field = strtok(NULL, ",");
+		            out *= -1;
+		        }
+		    }
+		    
+		    
+		    if(flag == 0) {
+	        	printf("not found\n");
 			}
-    	}
+			
+			printf("\n");
+	        fclose(file);	
+	        
+		} else {
+			
+			int check = 1;
+			
+			for (int j = 0; j < 4 ; j++) {
+				
+				if (input[j] != filename[0][j]) {
+					check = 0;
+					break;
+				}
+				
+			}
+	
+			if (check) {
+				
+				cout << "The file name is:\n";
+				
+			    for (int i = 0; i < fileNum; ++i) {
+			    	
+			        cout << filename[i] << endl;
+			    }
+			    
+				for (int i = 0; i < fileNum - 1; ++i) {
+					
+					snprintf(filepath, sizeof(filepath), "%s/%s", C_directory, filename[i]);
+		        	printf("\n=====================================\n\nCID:%s\nfilepath:%s\nSID:\n", input, filepath);
+		    		FILE* file = fopen(filepath, "r");
+		    		
+				    char line[50];
+				    char *field;
+				    char fieldBuffer[100];
+				    
+				    fgets(line, 50, file);
+				    
+					int out = 1;
+					
+				    while (fgets(line, 100, file) != NULL) {
+				    	
+				        field = strtok(line, ",");
+				        
+				        while (field != NULL) {
+				        	
+				        	if (out > 0) { 
+				            	sscanf(field, " %255[^,\n]",  fieldBuffer);
+				           		printf("%s ", fieldBuffer);
+		
+				            } else {
+			            		sscanf(field, " %255[^,\n]",  fieldBuffer);
+							}
+		
+				            field = strtok(NULL, ",");
+				            out *= -1;
+				        }
+				        
+				    }
+	
+					printf("\n");
+			        fclose(file);
+				}
+				
+				
+	    	} else {
+		       	printf("\n\nCID:%s\nfilepath:null\nSID:\nnot found\n", input);
+			}
+		}
+		
+		printf("\n=====================================\n\n");
+		
 	}
+    
 	
 
 	return 0;
+}
+
+void creat_SIDindex() {
+	
+	const char* S_dir = "./block/sid";    
+    DIR* dir = opendir(S_dir);
+    
+    if (dir == NULL) {
+    	
+        printf("not found: %s\n", S_dir);
+        return;
+    }
+    
+	struct dirent* entry;	
+    int file = 0;
+    int i = 0;
+    
+	while ((entry = readdir(dir)) != NULL) {
+		
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        
+    	char* dot = strrchr(entry->d_name, '.');  
+    	
+	    if(dot) {
+	        *dot = '\0';  
+	    }
+	    
+		strcpy(SID_index[i], entry->d_name);
+		++i;
+		
+    }
+    
+    SID_index[i][0] = '\0';
+    i = 0;
+    
+    while(SID_index[i][0] != '\0'){
+    	
+    	printf("%s\n",SID_index[i]);
+    	++i;
+	}
+	
+    closedir(dir);
+	
+	return;
+}
+
+void creat_CIDindex() {
+	
+	const char* C_dir = "./block/cid";
+    DIR* dir = opendir(C_dir);
+    
+    if (dir == NULL) {
+        printf("not found: %s\n", C_dir);
+        return;
+    }
+    
+	struct dirent* entry;	
+    int file = 0;
+    int i = 0;
+    
+	while ((entry = readdir(dir)) != NULL) {
+		
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        
+        char* dot = strrchr(entry->d_name, '.');  
+        
+	    if(dot) {
+	        *dot = '\0';  
+	    }
+	    
+		strcpy(CID_index[i], entry->d_name);
+		++i;
+		
+    }
+    
+    CID_index[i][0] = '\0';
+    i = 0;
+    
+    while(CID_index[i][0] != '\0'){
+    	
+    	printf("%s\n",CID_index[i]);
+    	++i;
+	}
+	
+    closedir(dir);
+	
+	return;
 }
 
