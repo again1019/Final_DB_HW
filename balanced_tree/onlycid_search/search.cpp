@@ -12,85 +12,62 @@ typedef struct Node {
     int course_id;
     char student_id[MAX][12];
     int count;
-    int height; // �s�W�������ܶq
+    int height; // 新增的高度變量
     struct Node* left;
     struct Node* right;
     struct Node* myparent;
     
 } Node;
 
-// �p��`�I������
-int getHeight(Node* node) {
-    if (node == NULL) {
-        return 0;
-    }
-//	int leftHeight = getHeight(node->left);
-//    int rightHeight = getHeight(node->right);
-    return node->height;
-}
-// ��s�`�I������
-void updateHeight(Node* node) {
-    int leftHeight = getHeight(node->left);
-    int rightHeight = getHeight(node->right);
-    node->height = (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
-}
-//���Ŧ]�l
-int getBalanceFactor(Node* node) {
-    if (node == NULL) {
-        return 0;
-    }
-    return getHeight(node->left) - getHeight(node->right);
+// Calculate height
+int height(Node *N) {
+  if (N == NULL)
+    return 0;
+  return N->height;
 }
 
-Node* rotateRight(Node* node) {
-    Node* newRoot = node->left;
-    node->left = newRoot->right;
-    newRoot->right = node;
+int max(int a, int b) {
+  return (a > b) ? a : b;
+}
+// Right rotate
+struct Node *rightRotate(struct Node *y) {
+  struct Node *x = y->left;
+  struct Node *T2 = x->right;
 
-    return newRoot;
+  x->right = y;
+  y->left = T2;
+
+  y->height = max(height(y->left), height(y->right)) + 1;
+  x->height = max(height(x->left), height(x->right)) + 1;
+
+  return x;
 }
 
-Node* rotateLeft(Node* node) {
-    Node* newRoot = node->right;
-    node->right = newRoot->left;
-    newRoot->left = node;
+// Left rotate
+struct Node *leftRotate(struct Node *x) {
+  struct Node *y = x->right;
+  struct Node *T2 = y->left;
 
-    // ��s����
-    updateHeight(node);
-    updateHeight(newRoot);
+  y->left = x;
+  x->right = T2;
 
-    return newRoot;
+  x->height = max(height(x->left), height(x->right)) + 1;
+  y->height = max(height(y->left), height(y->right)) + 1;
+
+  return y;
 }
 
-Node* balance(Node* node) {
-    // ��s�`�I������
-    updateHeight(node);
-
-    // �ˬd���Ŧ]�l
-    int balanceFactor = getBalanceFactor(node);
-
-    if (balanceFactor > 1) {
-        // �k��
-
-        if (getBalanceFactor(node->left) < 0) {
-            node->left = rotateLeft(node->left);
-        }
-        return rotateRight(node);
-    }
-    else if (balanceFactor < -1) {
-        // ����
-        if (getBalanceFactor(node->right) > 0) {
-            node->right = rotateRight(node->right);
-        }
-        return rotateLeft(node);
-    }
-
-    // �`�I���šA���ݭn�i�����ާ@
-    return node;
+// Get the balance factor
+int getBalance(struct Node *N) {
+  if (N == NULL)
+    return 0;
+  return height(N->left) - height(N->right);
 }
+
+
 // insert node
-void insert(Node** root, int course_id, const char* student_id) {
-    Node* cur = *root;
+Node* insert(Node* root, int course_id, const char* student_id) {
+    Node* cur = root;
     Node* pre = NULL;
     Node* prepre = NULL;
     Node* newNode = (Node*)malloc(sizeof(Node));
@@ -100,55 +77,50 @@ void insert(Node** root, int course_id, const char* student_id) {
     newNode->left = NULL;
     newNode->right = NULL;
     newNode->myparent = NULL;
-    newNode->height = 1; // ��l�ư��׬�1
+    newNode->height = 1; // 初始化高度為1
     
     if (cur == NULL) {
-        *root = newNode;
-        return;
+        root = newNode;
+        return root;
     }
     else{
-    	while(cur){
-    		if (course_id < cur->course_id) {
-    			prepre=pre;
-	            pre=cur;
-	            cur=cur->left;
-	        }
-	        else if (course_id > cur->course_id)
-	        {
-	        	prepre=pre;
-	            pre = cur;
-				cur = cur->right;
-	        }
-	        else if (course_id == cur->course_id)
-	        {
-	        	prepre=pre;
-	        	pre = cur;
-				break;
-	        }	
+    	if (course_id < root->course_id)
+		    root->left = insert(root->left, course_id,student_id);
+		else if (course_id > root->course_id)
+		    root->right = insert(root->right, course_id,student_id);
+		else if (course_id == root->course_id){
+			root->count = (root->count)+1;
+			strcpy(root->student_id[root->count], student_id);
+			return root;
 		}
-		if (course_id > pre->course_id) {
-			pre->right = newNode;
-			newNode->myparent=pre;
-		} else if(course_id < pre->course_id){
-			pre->left = newNode;
-			newNode->myparent=pre;
-		}
-		else if(course_id == pre->course_id)
-		{
-			free(newNode);
-			pre->count = (pre->count)+1;
-			strcpy(pre->student_id[pre->count], student_id);	  
-		} 
-		//balance
+	
+	// Update the balance factor of each node and
+  	// Balance tree
+	  root->height = 1 + max(height(root->left),height(root->right));
+	
+	  int balance = getBalance(root);
+	  if (balance > 1 && course_id < root->left->course_id)//平衡因子大於 1，且插入的節點位於左子節點的左子樹上，執行右旋
+	    return rightRotate(root);
+	
+	  if (balance < -1 && course_id > root->right->course_id)//平衡因子小於 -1，且插入的節點位於右子節點的右子樹上，執行左旋
+	    return leftRotate(root);
 		
-		while(pre){
-			updateHeight(pre);
-			pre=pre->myparent;
-		}
-		
-		*root = balance(*root); 
+	 //平衡因子大於 1，且插入的節點位於左子節點的右子樹上，先對當前節點的左子樹進行左旋，再對當前節點執行右旋
+	  if (balance > 1 && course_id > root->left->course_id) {
+	    root->left = leftRotate(root->left);
+	    return rightRotate(root);
+	  }
+	//平衡因子小於 -1，且插入的節點位於右子節點的左子樹上，那麼先對當前節點的右子樹進行右旋，再對當前節點執行左旋
+	  if (balance < -1 && course_id < root->right->course_id) {
+	    root->right = rightRotate(root->right);
+	    return leftRotate(root);
+	  }
+	
+	  return root;
 	}
+
 }
+
 
 
 Node* insert_nodes_from_blocks() {
@@ -177,7 +149,7 @@ Node* insert_nodes_from_blocks() {
             int course_id;
             char student_id[12];
             sscanf(entry->d_name, "%d_%[^.]", &course_id, student_id);
-            insert(&root, course_id, student_id);
+            root = insert(root, course_id, student_id);
            // printf("%d:%d,%s\n",cc, course_id, student_id);
         }
         cc++;
@@ -201,7 +173,7 @@ void search_course_id(Node* root, int target_course_id) {
         printf("Student ID:\n");
         int cc=1;
         for(int i = 0; i <= cur->count; i++)  {
-            // ���}�Pcourse_id������block
+            // 打開與course_id對應的block
             char block_filename[100];
             sprintf(block_filename, "%s%d_%s.csv", BLOCK_FOLDER, cur->course_id, cur->student_id[i]);
             FILE* block_file = fopen(block_filename, "r");
@@ -260,10 +232,12 @@ int main() {
     Node* root = NULL;
 
     root = insert_nodes_from_blocks();
+   // preorder(root);
+    //inorder(root);
     int target_course_id=1;
     while(target_course_id != 0)
     {
-        printf("Enter course ID to search: ");
+        printf("Enter course ID : ");
         scanf("%d", &target_course_id);
         if(target_course_id == 0)
             break;
@@ -273,5 +247,4 @@ int main() {
 
     return 0;
 }
-
 
